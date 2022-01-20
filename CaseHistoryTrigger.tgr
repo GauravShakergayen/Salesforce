@@ -1,0 +1,29 @@
+Trigger CaseHistoryTrigger on Case(before update){
+    
+    Map<Id,Case> updatedCase = new Map<Id,Case>();
+    for(Case cs:Trigger.New){
+        if(Trigger.oldMap.get(cs.Id).Status != cs.Status){
+            updatedCase.put(cs.Id,cs);
+        }
+    }
+    
+    List<CaseHistory> chList =[select Id,caseId,CreatedDate from caseHistory where Field='Status' AND caseId IN:updatedCase.keyset() order by createddate DESC LIMIT 2];
+    
+        for(Case cs:Trigger.New){
+       
+            for(integer i=0;i<chList.size();i++){
+            
+                Long date2 = chList[0].CreatedDate.GetTime();
+                Long currDate = DateTime.now().getTime();
+                Long milliseconds = currDate - date2;
+                Long seconds = milliseconds / 1000;
+                Long minutes = seconds / 60;
+                Long hours = minutes / 60;
+                Long days = hours / 24; 
+                cs.subject = 'Total Time Spent'+days+' Days '+hours+' Hours '+minutes +'Minutes';
+            }
+            
+
+        }
+        
+     }
